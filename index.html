@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.90">
+    <title>Exam Portal</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f0e1; /* Changed to beige */
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 20px;
+            padding: 40px;
+            background-color: #ffffff; /* Light background color */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header h1 {
+            text-align: center;
+            color: #8B4513; /* Changed to brown */
+            margin-bottom: 20px;
+            font-size: 3rem;
+            font-family: 'Arial', sans-serif;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.9rem;
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            font-size: 1.1rem;
+            text-decoration: none;
+        }
+
+        .btn.green {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .btn.green:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        .btn.red {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn.red:hover {
+            background-color: #c82333;
+            transform: scale(1.05);
+        }
+
+        .btn.blue {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .btn.blue:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .login-form-container {
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #ffffff; /* Light background color */
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        form input[type="text"],
+        form input[type="password"],
+        form input[type="date"],
+        form textarea {
+            width: 100%;
+            padding: 18px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+
+        form input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        form textarea {
+            height: 140px;
+            resize: none;
+        }
+
+        .form-links {
+            text-align: center;
+        }
+
+        .form-links a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .form-links a:hover {
+            text-decoration: underline;
+        }
+
+        .exam-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #exam-content, #results-display {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        #marks {
+            height: 50px; /* Increased height for marks input */
+        }
+
+        .result-spacing {
+            margin-top: 20px; /* Increased space between results */
+            margin-bottom: 20px; /* Increased space below results */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>EXAM PORTAL</h1>
+    </header>
+    
+    <section id="home-section">
+        <div class="login-options">
+            <button class="btn blue" onclick="showLogin('admin')">Admin Login</button>
+            <button class="btn blue" onclick="showLogin('candidate')">Candidate Login</button>
+        </div>
+    </section>
+
+    <section id="login-section" style="display: none;">
+        <div class="login-form-container">
+            <h2 id="login-title"></h2>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" class="btn green">Login</button>
+            </form>
+            <div class="form-links">
+                <a href="#" onclick="backToHome()">Back to Home</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="admin-dashboard" style="display: none;">
+        <h2>Admin Dashboard</h2>
+        <button class="btn blue" onclick="toggleSection('schedule-exam-section')">Schedule Exam</button>
+        <button class="btn blue" onclick="toggleSection('upload-questions-section')">Upload Questions</button>
+        <button class="btn blue" onclick="toggleSection('publish-results-section')">Publish Results</button>
+        <button class="btn red" onclick="logout()">Logout</button>
+        
+        <div id="schedule-exam-section" class="exam-container">
+            <h3>Schedule Exam</h3>
+            <input type="date" id="exam-date" required>
+            <button class="btn blue" onclick="scheduleExam()">Schedule</button>
+            <div class="form-links">
+                <a href="#" onclick="backToAdminDashboard()">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div id="upload-questions-section" class="exam-container">
+            <h3>Upload Questions</h3>
+            <textarea id="upload-questions" placeholder="Enter questions here..." required></textarea>
+            <button class="btn blue" onclick="uploadQuestions()">Upload</button>
+            <div class="form-links">
+                <a href="#" onclick="backToAdminDashboard()">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div id="publish-results-section" class="exam-container">
+            <h3>Publish Results</h3>
+            <div id="results-content" class="result-spacing"></div>
+            <input type="text" id="marks" placeholder="Enter Marks" required>
+            <button class="btn blue" onclick="publishResults()">Publish</button>
+            <div class="form-links">
+                <a href="#" onclick="backToAdminDashboard()">Back to Dashboard</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="candidate-dashboard" style="display: none;">
+        <h2>Candidate Dashboard</h2>
+        <button class="btn blue" onclick="showAttendExam()">Attempt Exam</button>
+        <button class="btn blue" onclick="showViewResults()">View Results</button>
+        <button class="btn red" onclick="logout()">Logout</button>
+
+        <div id="attend-exam-section" class="exam-container">
+            <h3>Exam Questions</h3>
+            <div id="exam-content"></div>
+            <textarea id="candidate-answers" placeholder="Type your answers here..."></textarea>
+            <button class="btn blue" onclick="submitAnswers()">Submit Answers</button>
+            <div class="form-links">
+                <a href="#" onclick="backToCandidateDashboard()">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div id="view-results-section" class="exam-container">
+            <h3>Your Results</h3>
+            <div id="results-display"></div>
+            <div class="result-spacing" id="no-results-message" style="display: block;">Results are not yet published.</div>
+            <div class="form-links">
+                <a href="#" onclick="backToCandidateDashboard()">Back to Dashboard</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    let questions = "";
+    let answers = "";
+    let marks = "";
+
+    function showLogin(role) {
+        document.getElementById('home-section').style.display = 'none';
+        document.getElementById('login-section').style.display = 'block';
+        document.getElementById('login-title').innerText = role.charAt(0).toUpperCase() + role.slice(1) + " Login";
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+    }
+
+    function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (username === "admin" && password === "123456") {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('admin-dashboard').style.display = 'block';
+        } else if (username === "candidate" && password === "123456") {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('candidate-dashboard').style.display = 'block';
+        } else {
+            alert("Login Failed: Invalid username or password");
+        }
+    }
+
+    function backToHome() {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('home-section').style.display = 'block';
+    }
+
+    function logout() {
+        document.getElementById('admin-dashboard').style.display = 'none';
+        document.getElementById('candidate-dashboard').style.display = 'none';
+        document.getElementById('schedule-exam-section').style.display = 'none';
+        document.getElementById('upload-questions-section').style.display = 'none';
+        document.getElementById('attend-exam-section').style.display = 'none';
+        document.getElementById('publish-results-section').style.display = 'none';
+        document.getElementById('view-results-section').style.display = 'none';
+        document.getElementById('home-section').style.display = 'block';
+    }
+
+    function toggleSection(sectionId) {
+        const sections = ['schedule-exam-section', 'upload-questions-section', 'publish-results-section', 'attend-exam-section', 'view-results-section'];
+        sections.forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+        document.getElementById(sectionId).style.display = 'block';
+    }
+
+    function scheduleExam() {
+        const date = document.getElementById('exam-date').value;
+        alert(`Exam scheduled on ${date}.`);
+        document.getElementById('schedule-exam-section').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+    }
+
+    function uploadQuestions() {
+        const uploadedQuestions = document.getElementById('upload-questions').value;
+        questions = uploadedQuestions;
+        alert("Questions Uploaded Successfully!");
+        
+        // Update the results content immediately after uploading questions
+        const resultsContent = document.getElementById('results-content');
+        resultsContent.innerHTML = `\
+            <strong>Questions:</strong><br>${questions || "No questions uploaded."}<br>\
+            <strong>Answers:</strong><br>${answers || "No answers submitted."}<br>\
+            <strong>Marks:</strong> ${marks || "N/A"}`;
+        
+        document.getElementById('upload-questions-section').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+    }
+
+    function publishResults() {
+        marks = document.getElementById('marks').value;
+        const resultsContent = document.getElementById('results-content');
+        resultsContent.innerHTML = `\
+            <strong>Questions:</strong><br>${questions || "No questions uploaded."}<br>\
+            <strong>Answers:</strong><br>${answers || "No answers submitted."}<br>\
+            <strong>Marks:</strong> ${marks}`;
+        alert(`Results Published!\nMarks: ${marks}`);
+        
+        // Hide the "Results are not yet published." message
+        document.getElementById('no-results-message').style.display = 'none';
+
+        document.getElementById('publish-results-section').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+    }
+
+    function showAttendExam() {
+        document.getElementById('attend-exam-section').style.display = 'block';
+        document.getElementById('exam-content').innerText = questions || "No questions available.";
+    }
+
+    function submitAnswers() {
+        answers = document.getElementById('candidate-answers').value;
+        alert(`Answers Submitted:\n${answers}`);
+        document.getElementById('attend-exam-section').style.display = 'none';
+        document.getElementById('candidate-dashboard').style.display = 'block';
+        
+        // Update the publish results section with the new answers
+        const resultsContent = document.getElementById('results-content');
+        resultsContent.innerHTML = `\
+            <strong>Questions:</strong><br>${questions || "No questions uploaded."}<br>\
+            <strong>Answers:</strong><br>${answers || "No answers submitted."}<br>\
+            <strong>Marks:</strong> ${marks || "N/A"}`;
+    }
+
+    function showViewResults() {
+        document.getElementById('view-results-section').style.display = 'block';
+        const resultsDisplay = document.getElementById('results-display');
+        
+        if (marks) {
+            resultsDisplay.innerText = `Marks: ${marks}`;
+            document.getElementById('no-results-message').style.display = 'none'; // Hide the not published message
+        } else {
+            resultsDisplay.innerText = "";
+            document.getElementById('no-results-message').style.display = 'block'; // Show the not published message
+        }
+    }
+
+    function backToAdminDashboard() {
+        document.getElementById('schedule-exam-section').style.display = 'none';
+        document.getElementById('upload-questions-section').style.display = 'none';
+        document.getElementById('publish-results-section').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+    }
+
+    function backToCandidateDashboard() {
+        document.getElementById('attend-exam-section').style.display = 'none';
+        document.getElementById('view-results-section').style.display = 'none';
+        document.getElementById('candidate-dashboard').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
