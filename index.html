@@ -39,8 +39,7 @@
             font-family: 'Arial', sans-serif;
         }
 		
-		.welcome-message 
-		{
+		.welcome-message {
             text-align: center;
             margin-bottom: 20px;
             font-size: 1.2rem;
@@ -357,13 +356,15 @@
     }
 
     function showAttendExam() {
-        if (questions) {
-            document.getElementById('attend-exam-section').style.display = 'block';
-            document.getElementById('exam-content').textContent = questions;
-        } else {
-            alert('No exam is currently scheduled.');
-        }
-    }
+		document.getElementById('view-results-section').style.display = 'none';
+    
+		if (questions) {
+			document.getElementById('attend-exam-section').style.display = 'block';
+			document.getElementById('exam-content').textContent = questions;
+		} else {
+			alert('No exam is currently scheduled.');
+		}
+	}
 
     function submitAnswers() {
         answers = document.getElementById('candidate-answers').value;
@@ -375,17 +376,19 @@
     }
 
     function showViewResults() {
-        const resultsDisplay = document.getElementById('results-display');
-        const noResultsMessage = document.getElementById('no-results-message');
+		document.getElementById('attend-exam-section').style.display = 'none';
+    
+		const resultsDisplay = document.getElementById('results-display');
+		const noResultsMessage = document.getElementById('no-results-message');
 
-        if (resultsPublished) {
-            resultsDisplay.innerHTML = `<strong>Marks:</strong> ${marks}`;
-            noResultsMessage.style.display = 'none';
-        } else {
-            noResultsMessage.style.display = 'block';
-        }
-        document.getElementById('view-results-section').style.display = 'block';
-    }
+		if (resultsPublished) {
+			resultsDisplay.innerHTML = `<strong>Marks:</strong> ${marks}`;
+			noResultsMessage.style.display = 'none';
+		} else {
+			noResultsMessage.style.display = 'block';
+		}
+		document.getElementById('view-results-section').style.display = 'block';
+	}
 
     function logout() {
         document.getElementById('admin-dashboard').style.display = 'none';
