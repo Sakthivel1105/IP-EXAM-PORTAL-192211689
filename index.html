@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.90">
-    <title>Exam Portal</title>
+    <title>Exam Portal</title>    
     <style>
         /* General Styling */
         body {
@@ -99,13 +99,16 @@
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            align-items: center;
+            display: flex;
+            flex-direction: column;
+            align-items: auto;
         }
 
         form input[type="text"],
         form input[type="password"],
         form input[type="date"],
-        form textarea {
+        form textarea 
+        {
             width: 100%;
             padding: 18px;
             margin: 10px 0;
@@ -218,7 +221,8 @@
 
         <div id="publish-results-section" class="exam-container">
             <h3>Publish Results</h3>
-            <div id="results-content" class="result-spacing"></div>
+            <div id="questions-display" class="result-spacing"></div>
+            <div id="answers-display" class="result-spacing"></div>
             <input type="text" id="marks" placeholder="Enter Marks" required>
             <button class="btn blue" onclick="publishResults()">Publish</button>
             <div class="form-links">
@@ -229,14 +233,14 @@
 
     <section id="candidate-dashboard" style="display: none;">
         <h2>Candidate Dashboard</h2>
-        <button class="btn blue" onclick="showAttendExam()">Attempt Exam</button>
+        <button class="btn blue" onclick="toggleSection('attend-exam-section')">Attend Exam</button>
         <button class="btn blue" onclick="showViewResults()">View Results</button>
         <button class="btn red" onclick="logout()">Logout</button>
-
+        
         <div id="attend-exam-section" class="exam-container">
-            <h3>Exam Questions</h3>
+            <h3>Attend Exam</h3>
             <div id="exam-content"></div>
-            <textarea id="candidate-answers" placeholder="Type your answers here..."></textarea>
+            <textarea id="candidate-answers" placeholder="Enter your answers here..." required></textarea>
             <button class="btn blue" onclick="submitAnswers()">Submit Answers</button>
             <div class="form-links">
                 <a href="#" onclick="backToCandidateDashboard()">Back to Dashboard</a>
@@ -244,9 +248,9 @@
         </div>
 
         <div id="view-results-section" class="exam-container">
-            <h3>Your Results</h3>
-            <div id="results-display"></div>
-            <div class="result-spacing" id="no-results-message" style="display: block;">Results are not yet published.</div>
+            <h3>View Results</h3>
+            <div id="results-display" class="result-spacing"></div>
+            <div id="no-results-message" style="display: none;">Results not yet published.</div>
             <div class="form-links">
                 <a href="#" onclick="backToCandidateDashboard()">Back to Dashboard</a>
             </div>
@@ -255,32 +259,15 @@
 </div>
 
 <script>
-    let questions = "";
-    let answers = "";
-    let marks = "";
+    let questions = '';
+    let answers = '';
+    let marks = ''; // Variable to hold the published marks
+    let resultsPublished = false; // Flag to track if results are published
 
     function showLogin(role) {
         document.getElementById('home-section').style.display = 'none';
         document.getElementById('login-section').style.display = 'block';
-        document.getElementById('login-title').innerText = role.charAt(0).toUpperCase() + role.slice(1) + " Login";
-        document.getElementById('username').value = '';
-        document.getElementById('password').value = '';
-    }
-
-    function handleLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        if (username === "admin" && password === "123456") {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('admin-dashboard').style.display = 'block';
-        } else if (username === "candidate" && password === "123456") {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('candidate-dashboard').style.display = 'block';
-        } else {
-            alert("Login Failed: Invalid username or password");
-        }
+        document.getElementById('login-title').textContent = role.charAt(0).toUpperCase() + role.slice(1) + ' Login';
     }
 
     function backToHome() {
@@ -288,109 +275,111 @@
         document.getElementById('home-section').style.display = 'block';
     }
 
-    function logout() {
-        document.getElementById('admin-dashboard').style.display = 'none';
-        document.getElementById('candidate-dashboard').style.display = 'none';
-        document.getElementById('schedule-exam-section').style.display = 'none';
-        document.getElementById('upload-questions-section').style.display = 'none';
-        document.getElementById('attend-exam-section').style.display = 'none';
-        document.getElementById('publish-results-section').style.display = 'none';
-        document.getElementById('view-results-section').style.display = 'none';
-        document.getElementById('home-section').style.display = 'block';
-    }
+    function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
 
-    function toggleSection(sectionId) {
-        const sections = ['schedule-exam-section', 'upload-questions-section', 'publish-results-section', 'attend-exam-section', 'view-results-section'];
-        sections.forEach(id => {
-            document.getElementById(id).style.display = 'none';
-        });
-        document.getElementById(sectionId).style.display = 'block';
-    }
-
-    function scheduleExam() {
-        const date = document.getElementById('exam-date').value;
-        alert(`Exam scheduled on ${date}.`);
-        document.getElementById('schedule-exam-section').style.display = 'none';
-        document.getElementById('admin-dashboard').style.display = 'block';
-    }
-
-    function uploadQuestions() {
-        const uploadedQuestions = document.getElementById('upload-questions').value;
-        questions = uploadedQuestions;
-        alert("Questions Uploaded Successfully!");
-        
-        // Update the results content immediately after uploading questions
-        const resultsContent = document.getElementById('results-content');
-        resultsContent.innerHTML = `\
-            <strong>Questions:</strong><br>${questions || "No questions uploaded."}<br>\
-            <strong>Answers:</strong><br>${answers || "No answers submitted."}<br>\
-            <strong>Marks:</strong> ${marks || "N/A"}`;
-        
-        document.getElementById('upload-questions-section').style.display = 'none';
-        document.getElementById('admin-dashboard').style.display = 'block';
-    }
-
-    function publishResults() {
-        marks = document.getElementById('marks').value;
-        const resultsContent = document.getElementById('results-content');
-        resultsContent.innerHTML = `\
-            <strong>Questions:</strong><br>${questions || "No questions uploaded."}<br>\
-            <strong>Answers:</strong><br>${answers || "No answers submitted."}<br>\
-            <strong>Marks:</strong> ${marks}`;
-        alert(`Results Published!\nMarks: ${marks}`);
-        
-        // Hide the "Results are not yet published." message
-        document.getElementById('no-results-message').style.display = 'none';
-
-        document.getElementById('publish-results-section').style.display = 'none';
-        document.getElementById('admin-dashboard').style.display = 'block';
-    }
-
-    function showAttendExam() {
-        document.getElementById('attend-exam-section').style.display = 'block';
-        document.getElementById('exam-content').innerText = questions || "No questions available.";
-    }
-
-    function submitAnswers() {
-        answers = document.getElementById('candidate-answers').value;
-        alert(`Answers Submitted:\n${answers}`);
-        document.getElementById('attend-exam-section').style.display = 'none';
-        document.getElementById('candidate-dashboard').style.display = 'block';
-        
-        // Update the publish results section with the new answers
-        const resultsContent = document.getElementById('results-content');
-        resultsContent.innerHTML = `\
-            <strong>Questions:</strong><br>${questions || "No questions uploaded."}<br>\
-            <strong>Answers:</strong><br>${answers || "No answers submitted."}<br>\
-            <strong>Marks:</strong> ${marks || "N/A"}`;
-    }
-
-    function showViewResults() {
-        document.getElementById('view-results-section').style.display = 'block';
-        const resultsDisplay = document.getElementById('results-display');
-        
-        if (marks) {
-            resultsDisplay.innerText = `Marks: ${marks}`;
-            document.getElementById('no-results-message').style.display = 'none'; // Hide the not published message
+        if (username === 'admin' && password === '123456') {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('admin-dashboard').style.display = 'block';
+        } else if (username === 'candidate' && password === '123456') {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('candidate-dashboard').style.display = 'block';
         } else {
-            resultsDisplay.innerText = "";
-            document.getElementById('no-results-message').style.display = 'block'; // Show the not published message
+            alert('Invalid username or password');
         }
     }
 
     function backToAdminDashboard() {
-        document.getElementById('schedule-exam-section').style.display = 'none';
-        document.getElementById('upload-questions-section').style.display = 'none';
-        document.getElementById('publish-results-section').style.display = 'none';
-        document.getElementById('admin-dashboard').style.display = 'block';
+        const containers = document.querySelectorAll('.exam-container');
+        containers.forEach(container => container.style.display = 'none');
     }
 
     function backToCandidateDashboard() {
-        document.getElementById('attend-exam-section').style.display = 'none';
-        document.getElementById('view-results-section').style.display = 'none';
-        document.getElementById('candidate-dashboard').style.display = 'block';
+        const containers = document.querySelectorAll('.exam-container');
+        containers.forEach(container => container.style.display = 'none');
+    }
+
+    function toggleSection(sectionId) {
+        const containers = document.querySelectorAll('.exam-container');
+        containers.forEach(container => container.style.display = 'none');
+
+        const section = document.getElementById(sectionId);
+        section.style.display = 'block';
+
+        if (sectionId === 'attend-exam-section') {
+            showAttendExam(); // Call to display the uploaded questions
+        } else if (sectionId === 'publish-results-section') {
+            document.getElementById('questions-display').innerHTML = `<strong>Questions:</strong><br>${questions}`;
+            document.getElementById('answers-display').innerHTML = `<strong>Answers:</strong><br>${answers}`;
+        }
+    }
+
+    function scheduleExam() {
+        const examDate = document.getElementById('exam-date').value;
+        if (examDate) {
+            alert('Exam scheduled on ' + examDate);
+        } else {
+            alert('Please select an exam date');
+        }
+    }
+
+    function uploadQuestions() {
+        questions = document.getElementById('upload-questions').value;
+        if (questions) {
+            alert('Questions uploaded successfully');
+        } else {
+            alert('Please enter questions');
+        }
+    }
+
+    function publishResults() {
+        marks = document.getElementById('marks').value;
+        if (marks) {
+            resultsPublished = true; // Set the flag to true when results are published
+            alert('Results published successfully with marks: ' + marks);
+        } else {
+            alert('Please enter marks');
+        }
+    }
+
+    function showAttendExam() {
+        if (questions) {
+            document.getElementById('attend-exam-section').style.display = 'block';
+            document.getElementById('exam-content').textContent = questions;
+        } else {
+            alert('No exam is currently scheduled.');
+        }
+    }
+
+    function submitAnswers() {
+        answers = document.getElementById('candidate-answers').value;
+        if (answers) {
+            alert('Answers submitted successfully');
+        } else {
+            alert('Please enter your answers');
+        }
+    }
+
+    function showViewResults() {
+        const resultsDisplay = document.getElementById('results-display');
+        const noResultsMessage = document.getElementById('no-results-message');
+
+        if (resultsPublished) {
+            resultsDisplay.innerHTML = `<strong>Marks:</strong> ${marks}`;
+            noResultsMessage.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'block';
+        }
+        document.getElementById('view-results-section').style.display = 'block';
+    }
+
+    function logout() {
+        document.getElementById('admin-dashboard').style.display = 'none';
+        document.getElementById('candidate-dashboard').style.display = 'none';
+        backToHome();
     }
 </script>
-
 </body>
 </html>
